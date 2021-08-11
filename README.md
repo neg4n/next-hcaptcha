@@ -31,9 +31,9 @@ export default withHCaptcha((req, res) => {
 
 ## TODO
 
-[ ] Add ability to configure
-[ ] Better README
-[ ] Tests
+- [ ] Configuration 
+- [ ] Better README 
+- [ ] Tests 
 
 ## Ending speech
 
