@@ -1,0 +1,62 @@
+{
+  "name": "next-hcaptcha",
+  "version": "1.0.0",
+  "description": "",
+  "author": {
+    "name": "Igor Klepacki",
+    "email": "neg4n@icloud.com",
+    "url": "https://neg4n.dev/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neg4n/next-hcaptcha"
+  },
+  "keywords": [
+    "nextjs",
+    "nextjs-plugin",
+    "hcaptcha",
+    "recaptcha",
+    "captcha",
+    "react-hcaptcha",
+    "react-recaptcha"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/neg4n/next-hcaptcha/issues"
+  },
+  "homepage": "https://github.com/neg4n/next-hcaptcha/#readme",
+  "source": "src/index.ts",
+  "main": "./lib/next-hcaptcha.cjs",
+  "module": "./lib/next-hcaptcha.module.js",
+  "unpkg": "./lib/next-hcaptcha.umd.js",
+  "types": "./lib/index.d.ts",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "prebuild": "rimraf lib",
+    "build": "microbundle",
+    "build:watch": "microbundle watch"
+  },
+  "devDependencies": {
+    "@types/node": "^16.4.13",
+    "microbundle": "^0.13.3",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.3.5"
+  },
+  "peerDependencies": {
+    "next": ">=9.0.0",
+    "react": ">=16.0.0",
+    "react-dom": ">=16.0.0"
+  },
+  "prettier": {
+    "printWidth": 90,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all"
+  }
+}
