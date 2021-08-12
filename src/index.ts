@@ -1,5 +1,9 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
+type NextHCaptchaOptions = {
+  envVarNames?: { secret: string }
+}
+
 type HCaptchaPayload = {
   secret: string
   response: string
@@ -26,11 +30,17 @@ const HCAPTCHA_ERRORS = {
   'sitekey-secret-mismatch': 'The sitekey is not registered with the provided secret.',
 }
 
-export function withHCaptcha(handler: NextApiHandler) {
+export function withHCaptcha(
+  handler: NextApiHandler,
+  options: NextHCaptchaOptions = {
+    envVarNames: { secret: 'HCAPTCHA_SECRET' },
+  },
+) {
+  const { envVarNames } = options
   return async (request: NextApiRequest, response: NextApiResponse) => {
-    if (!process.env.HCAPTCHA_SECRET || process.env.HCAPTCHA_SECRET === '') {
+    if (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '') {
       throw new Error(
-        `${HCAPTCHA_ERRORS['missing-input-secret']} This must be done by providing HCAPTCHA_SECRET environment variable.`,
+        `${HCAPTCHA_ERRORS['missing-input-secret']} This must be done by providing ${envVarNames.secret} environment variable.`,
       )
     }
 
