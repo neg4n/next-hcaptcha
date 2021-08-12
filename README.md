@@ -17,7 +17,44 @@ export default withHCaptcha((req, res) => {
 
 ## Configuration
 
-`HCAPTCHA_SECRET` environment variable must be set in your [Next.js][next-homepage] project.
+Configuration is done by passing options object as second `withHCaptcha` argument.
+
+Default options with all properties explained:
+
+```js
+const defaultOptions = {
+  // HCaptcha token verification url. Read more at https://docs.hcaptcha.com/#verify-the-user-response-server-side
+  captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
+  // Env vars names object. Key is type of env var and value is your custom name.
+  // Value can be any string as long as it matches your .env* file.
+  envVarNames: { secret: 'HCAPTCHA_SECRET' },
+}
+```
+
+### Configuration sharing
+
+Configuration sharing can be done by creating `next-hcaptcha.config.js` in root of your [Next.js][next-homepage] project and simply importing it and passing as argument in every (or specific) route(s).
+
+`next-hcaptcha.config.js`
+
+```js
+const config = {
+  // ...
+}
+
+export default config
+```
+
+
+`pages/api/your-route.js`
+```js
+import { withHCaptcha } from 'next-hcaptcha'
+import config from '../../next-hcaptcha.config'
+
+export default withHCaptcha((req, res) => {
+  res.status(200).json({ name: 'John Doe' })
+}, config)
+```
 
 ## Errors
 
@@ -31,15 +68,17 @@ export default withHCaptcha((req, res) => {
 
 ## TODO
 
-- [ ] Configuration 
-- [ ] Better README 
-- [ ] Tests 
+- [ ] Usage examples symlinked to `preview/pages/api/`
+- [ ] Configuration
+- [ ] Better README
+- [ ] Tests
 
 ## Ending speech
 
-This project is licensed under the MIT license.  
+This project is licensed under the MIT license.
 All contributions are welcome.
 
 [hcaptcha-docs-errors]: https://docs.hcaptcha.com/#siteverify-error-codes-table
 [next-homepage]: https://nextjs.org/
 [next-api-routes]: https://nextjs.org/docs/api-routes/introduction
+
