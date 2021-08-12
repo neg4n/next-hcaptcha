@@ -1,4 +1,17 @@
-# Next.js HCaptcha
+<div align="center">
+  <h1>Next.js HCaptcha</h1>
+  <br />
+</div>
+
+<div align="center">
+  <a href="https://www.npmjs.com/package/next-hcaptcha"><img alt="npm version badge" src="https://badgen.net/npm/v/next-hcaptcha"></a>  
+  <img alt="types information" src="https://badgen.net/npm/types/next-hcaptcha">
+  <img alt="npm bundle size" src="https://badgen.net/bundlephobia/minzip/next-hcaptcha">
+  <img alt="license badge" src="https://badgen.net/npm/license/next-hcaptcha">
+  
+</div>
+
+<br />
 
 ## Introduction
 
@@ -45,8 +58,8 @@ const config = {
 export default config
 ```
 
-
 `pages/api/your-route.js`
+
 ```js
 import { withHCaptcha } from 'next-hcaptcha'
 import config from '../../next-hcaptcha.config'
@@ -81,4 +94,3 @@ All contributions are welcome.
 [hcaptcha-docs-errors]: https://docs.hcaptcha.com/#siteverify-error-codes-table
 [next-homepage]: https://nextjs.org/
 [next-api-routes]: https://nextjs.org/docs/api-routes/introduction
-
