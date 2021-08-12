@@ -1,8 +1,9 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
-type NextHCaptchaOptions = {
-  envVarNames?: { secret: string }
-}
+export type NextHCaptchaOptions = Partial<{
+  captchaVerifyUrl: string
+  envVarNames: { secret: string }
+}>
 
 type HCaptchaPayload = {
   secret: string
@@ -13,8 +14,6 @@ type HCaptchaVerifyResponse = {
   success: boolean
   'error-codes': string | string[]
 }
-
-const HCAPTCHA_VERIFY_URL = 'https://hcaptcha.com/siteverify'
 
 const HCAPTCHA_ERRORS = {
   'missing-input-secret': 'Your secret key is missing.',
@@ -30,13 +29,16 @@ const HCAPTCHA_ERRORS = {
   'sitekey-secret-mismatch': 'The sitekey is not registered with the provided secret.',
 }
 
-export function withHCaptcha(
-  handler: NextApiHandler,
-  options: NextHCaptchaOptions = {
+export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptions = {}) {
+  const defaultOptions: NextHCaptchaOptions = {
+    captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
-  },
-) {
-  const { envVarNames } = options
+  }
+
+  options = { ...defaultOptions, ...options }
+
+  const { envVarNames, captchaVerifyUrl } = options
+
   return async (request: NextApiRequest, response: NextApiResponse) => {
     if (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '') {
       throw new Error(
@@ -63,7 +65,7 @@ export function withHCaptcha(
       response: recaptchaResponse || hcaptchaResponse,
     }
 
-    const hcaptchaVerifyResponse = await fetch(HCAPTCHA_VERIFY_URL, {
+    const hcaptchaVerifyResponse = await fetch(captchaVerifyUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
