@@ -2,12 +2,14 @@ import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
 export type NextHCaptchaOptions = Partial<{
   captchaVerifyUrl: string
+  passRequestIpAddress: boolean
   envVarNames: { secret: string }
 }>
 
 type HCaptchaPayload = {
   secret: string
   response: string
+  remoteip?: string
 }
 
 type HCaptchaVerifyResponse = {
@@ -32,12 +34,13 @@ const HCAPTCHA_ERRORS = {
 export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptions = {}) {
   const defaultOptions: NextHCaptchaOptions = {
     captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
+    passRequestIpAddress: false,
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
   options = { ...defaultOptions, ...options }
 
-  const { envVarNames, captchaVerifyUrl } = options
+  const { envVarNames, captchaVerifyUrl, passRequestIpAddress } = options
 
   return async (request: NextApiRequest, response: NextApiResponse) => {
     if (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '') {
@@ -60,9 +63,20 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       return
     }
 
+    const requestIpAddress = (request.headers['cf-connecting-ip'] ||
+      request.headers['x-forwarded-for'] ||
+      request.socket.remoteAddress) as string
+
     const payload: HCaptchaPayload = {
       secret: process.env.HCAPTCHA_SECRET,
       response: recaptchaResponse || hcaptchaResponse,
+      ...(passRequestIpAddress ? { remoteip: requestIpAddress } : null),
+    }
+
+    if (passRequestIpAddress && !requestIpAddress) {
+      throw new Error(
+        'Could not resolve request ip address. Check if your reverse proxy is configured properly or consider setting `passRequestIpAddress` to `false`. Find more at https://github.com/neg4n/next-hcaptcha#configuration',
+      )
     }
 
     const hcaptchaVerifyResponse = await fetch(captchaVerifyUrl, {

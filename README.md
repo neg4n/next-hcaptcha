@@ -38,6 +38,10 @@ Default options with all properties explained:
 const defaultOptions = {
   // HCaptcha token verification url. Read more at https://docs.hcaptcha.com/#verify-the-user-response-server-side
   captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
+  // Whether to pass request ip address or not
+  // The ip resolving is done by checking cf-connecting-ip, x-forwarded-for headers
+  // or evetually request.socket.remoteAddress property, if the two mentioned earlier are undefined.
+  passRequestIpAddress: false,
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },
