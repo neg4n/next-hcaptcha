@@ -30,18 +30,24 @@ export default withHCaptcha((req, res) => {
 
 ## Configuration
 
-Configuration is done by passing options object as second `withHCaptcha` argument.
+Configuration is done by passing options object as second `withHCaptcha` function call argument.
 
 Default options with all properties explained:
 
 ```js
 const defaultOptions = {
-  // HCaptcha token verification url. Read more at https://docs.hcaptcha.com/#verify-the-user-response-server-side
+  // HCaptcha token verification url. Read more at
+  // https://docs.hcaptcha.com/#verify-the-user-response-server-side
   captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
   // Whether to pass request ip address or not
   // The ip resolving is done by checking cf-connecting-ip, x-forwarded-for headers
-  // or evetually request.socket.remoteAddress property, if the two mentioned earlier are undefined.
+  // or evetually request.socket.remoteAddress property
+  // (if the two mentioned earlier are undefined).
   passRequestIpAddress: false,
+  // Whether to skip HCaptcha requests optimization or not.
+  // Requests optimization are simple static checks if some
+  // properties from the payload exist and if they are not empty.
+  skipCaptchaRequestsOptimization: false,
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },
@@ -75,7 +81,9 @@ export default withHCaptcha((req, res) => {
 
 ## Errors
 
-`next-hcaptcha` informs about errors as described in the [official HCaptcha docs][hcaptcha-docs-errors] with some (i believe) tweaks.
+`next-hcaptcha` informs about errors as described in the [official HCaptcha docs][hcaptcha-docs-errors] with some *(i believe)* tweaks.
+
+**NOTE**: Error optimization described in point **2.** and **3.** can be disabled by setting `skipCaptchaRequestsOptimization` in configuration to `true`
 
 1. Error messages (_descriptions_ in [docs][hcaptcha-docs-errors]) are shown directly instead of informing about the error code. This has purpose of improving overall work with the library and reduce eventual frustration caused by jumping between loads of documentation.
 

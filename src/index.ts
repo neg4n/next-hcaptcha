@@ -3,6 +3,7 @@ import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 export type NextHCaptchaOptions = Partial<{
   captchaVerifyUrl: string
   passRequestIpAddress: boolean
+  skipCaptchaRequestsOptimization: boolean
   envVarNames: { secret: string }
 }>
 
@@ -35,15 +36,24 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
   const defaultOptions: NextHCaptchaOptions = {
     captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
     passRequestIpAddress: false,
+    skipCaptchaRequestsOptimization: false,
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
   options = { ...defaultOptions, ...options }
 
-  const { envVarNames, captchaVerifyUrl, passRequestIpAddress } = options
+  const {
+    captchaVerifyUrl,
+    passRequestIpAddress,
+    skipCaptchaRequestsOptimization,
+    envVarNames,
+  } = options
 
   return async (request: NextApiRequest, response: NextApiResponse) => {
-    if (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '') {
+    if (
+      !skipCaptchaRequestsOptimization &&
+      (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '')
+    ) {
       throw new Error(
         `${HCAPTCHA_ERRORS['missing-input-secret']} This must be done by providing ${envVarNames.secret} environment variable.`,
       )
@@ -54,7 +64,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       'h-captcha-response': hcaptchaResponse = null,
     } = request.body
 
-    if (!recaptchaResponse && !hcaptchaResponse) {
+    if (!skipCaptchaRequestsOptimization && !recaptchaResponse && !hcaptchaResponse) {
       response.json({
         success: false,
         message: HCAPTCHA_ERRORS['missing-input-response'],
