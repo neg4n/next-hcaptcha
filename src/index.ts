@@ -126,12 +126,12 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     if (!success) {
       response.json({
         success,
-        message:
-          errorDisplayMode === 'message'
-            ? Array.isArray(error)
-              ? error.map((error) => HCAPTCHA_ERRORS[error])
-              : HCAPTCHA_ERRORS[error]
-            : error,
+        ...(errorDisplayMode === 'code' && { 'error-codes': error }),
+        ...(errorDisplayMode === 'message' && {
+          message: Array.isArray(error)
+            ? error.map((error) => HCAPTCHA_ERRORS[error])
+            : HCAPTCHA_ERRORS[error],
+        }),
       })
       response.end()
       return
