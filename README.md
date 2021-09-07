@@ -55,6 +55,13 @@ const defaultOptions = {
   // Whether to forward HCaptcha response parameters to Next.js API Route handler request parameter.
   // Accessible under request.hcaptcha (for TypeScript users - there is NextApiRequestWithHCaptcha type)
   forwardCaptchaResponse: false,
+  // Features that works only if you have HCaptcha enterprise
+  enterprise: {
+    // Minimum score threshold. Value between 1 (bot) and 0 (human).
+    // If scoreThreshold is specified, and no score is returned from HCaptcha
+    // response - it will result in an exception.
+    scoreThreshold: 0.6,
+  }
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },
@@ -99,10 +106,12 @@ can be restored to traditional way by setting `errorDisplayMode` to `'code'`
 
 3. `missing-input-response` is also handled by the library before sending request to HCaptcha verification endpoint and results in standard error respecting the first point.
 
+4. If `enterprise.scoreThreshold` is specified and no `score` is returned from HCaptcha API, it will result in runtime exception.
+
 ## TODO
 
 - [ ] Usage examples symlinked to `preview/pages/api/`
-- [ ] Configuration
+- [x] Configuration
 - [ ] Better README
 - [ ] Tests
 
