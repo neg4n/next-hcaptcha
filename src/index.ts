@@ -5,6 +5,7 @@ export type NextHCaptchaOptions = Partial<{
   passRequestIpAddress: boolean
   skipCaptchaRequestsOptimization: boolean
   errorDisplayMode: 'code' | 'message'
+  forwardCaptchaResponse: boolean
   envVarNames: { secret: string }
 }>
 
@@ -18,7 +19,16 @@ type HCaptchaVerifyError = string | string[]
 
 type HCaptchaVerifyResponse = {
   success: boolean
-  'error-codes': HCaptchaVerifyError
+  challenge_ts: string
+  hostname: string
+  credit?: boolean
+  'error-codes'?: HCaptchaVerifyError
+  score?: number
+  score_reason?: string[]
+}
+
+export type NextApiRequestWithHCaptcha = NextApiRequest & {
+  hcaptcha: HCaptchaVerifyResponse
 }
 
 const HCAPTCHA_ERRORS = {
@@ -41,6 +51,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     passRequestIpAddress: false,
     skipCaptchaRequestsOptimization: false,
     errorDisplayMode: 'message',
+    forwardCaptchaResponse: false,
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
@@ -51,10 +62,11 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     passRequestIpAddress,
     skipCaptchaRequestsOptimization,
     errorDisplayMode,
+    forwardCaptchaResponse,
     envVarNames,
   } = options
 
-  return async (request: NextApiRequest, response: NextApiResponse) => {
+  return async (request: NextApiRequestWithHCaptcha, response: NextApiResponse) => {
     if (
       !skipCaptchaRequestsOptimization &&
       (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '')
@@ -106,8 +118,10 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       throw new Error('Unknown error has occurred.')
     }
 
+    const hcaptchaVerifyResponseJson = await hcaptchaVerifyResponse.json()
+
     const { success, 'error-codes': error }: HCaptchaVerifyResponse =
-      await hcaptchaVerifyResponse.json()
+      hcaptchaVerifyResponseJson
 
     if (!success) {
       response.json({
@@ -121,6 +135,10 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       })
       response.end()
       return
+    }
+
+    if (forwardCaptchaResponse) {
+      request.hcaptcha = hcaptchaVerifyResponseJson
     }
 
     return handler(request, response)
