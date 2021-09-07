@@ -53,7 +53,8 @@ const defaultOptions = {
   // show the error code instead.
   errorDisplayMode: 'message',
   // Whether to forward HCaptcha response parameters to Next.js API Route handler request parameter.
-  // Accessible under request.hcaptcha (for TypeScript users - there is NextApiRequestWithHCaptcha type)
+  // Accessible under request.hcaptcha (for TypeScript users - there is NextApiRequestWithHCaptcha type).
+  // Forwarded only if HCaptcha response is success and (when specified) if passed `enterprise.scoreThreshold` check.
   forwardCaptchaResponse: false,
   // Features that works only if you have HCaptcha enterprise
   enterprise: {
