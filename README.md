@@ -52,6 +52,9 @@ const defaultOptions = {
   // from https://docs.hcaptcha.com/#siteverify-error-codes-table. If set to 'code' it will
   // show the error code instead.
   errorDisplayMode: 'message',
+  // Whether to forward HCaptcha response parameters to Next.js API Route handler request parameter.
+  // Accessible under request.hcaptcha (for TypeScript users - there is NextApiRequestWithHCaptcha type)
+  forwardCaptchaResponse: false,
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },
