@@ -1,0 +1,1 @@
+../preview/pages/api/basic-configuration.js
