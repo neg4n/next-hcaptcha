@@ -48,6 +48,10 @@ const defaultOptions = {
   // Requests optimization are simple static checks if some
   // properties from the payload exist and if they are not empty.
   skipCaptchaRequestsOptimization: false,
+  // Error display mode. If set to 'message', it will show error's descriptions
+  // from https://docs.hcaptcha.com/#siteverify-error-codes-table. If set to 'code' it will
+  // show the error code instead.
+  errorDisplayMode: 'message',
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },
@@ -81,9 +85,10 @@ export default withHCaptcha((req, res) => {
 
 ## Errors
 
-`next-hcaptcha` informs about errors as described in the [official HCaptcha docs][hcaptcha-docs-errors] with some *(i believe)* tweaks.
+`next-hcaptcha` informs about errors as described in the [official HCaptcha docs][hcaptcha-docs-errors] with some _(i believe)_ tweaks.
 
-**NOTE**: Error optimization described in point **2.** and **3.** can be disabled by setting `skipCaptchaRequestsOptimization` in configuration to `true`
+**NOTE**: Error optimization described in point **2.** and **3.** can be disabled by setting `skipCaptchaRequestsOptimization` in configuration to `true` and way of informing about errors described in point **1.**
+can be restored to traditional way by setting `errorDisplayMode` to `'code'`
 
 1. Error messages (_descriptions_ in [docs][hcaptcha-docs-errors]) are shown directly instead of informing about the error code. This has purpose of improving overall work with the library and reduce eventual frustration caused by jumping between loads of documentation.
 

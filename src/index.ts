@@ -4,6 +4,7 @@ export type NextHCaptchaOptions = Partial<{
   captchaVerifyUrl: string
   passRequestIpAddress: boolean
   skipCaptchaRequestsOptimization: boolean
+  errorDisplayMode: 'code' | 'message'
   envVarNames: { secret: string }
 }>
 
@@ -13,9 +14,11 @@ type HCaptchaPayload = {
   remoteip?: string
 }
 
+type HCaptchaVerifyError = string | string[]
+
 type HCaptchaVerifyResponse = {
   success: boolean
-  'error-codes': string | string[]
+  'error-codes': HCaptchaVerifyError
 }
 
 const HCAPTCHA_ERRORS = {
@@ -37,6 +40,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
     passRequestIpAddress: false,
     skipCaptchaRequestsOptimization: false,
+    errorDisplayMode: 'message',
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
@@ -46,6 +50,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     captchaVerifyUrl,
     passRequestIpAddress,
     skipCaptchaRequestsOptimization,
+    errorDisplayMode,
     envVarNames,
   } = options
 
@@ -107,9 +112,12 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     if (!success) {
       response.json({
         success,
-        message: Array.isArray(error)
-          ? error.map((error) => HCAPTCHA_ERRORS[error])
-          : HCAPTCHA_ERRORS[error],
+        message:
+          errorDisplayMode === 'message'
+            ? Array.isArray(error)
+              ? error.map((error) => HCAPTCHA_ERRORS[error])
+              : HCAPTCHA_ERRORS[error]
+            : error,
       })
       response.end()
       return
