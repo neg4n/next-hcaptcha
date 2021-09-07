@@ -56,7 +56,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     errorDisplayMode: 'message',
     forwardCaptchaResponse: false,
     enterprise: {
-      scoreThreshold: 0.6,
+      scoreThreshold: null,
     },
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
