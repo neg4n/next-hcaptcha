@@ -6,6 +6,9 @@ export type NextHCaptchaOptions = Partial<{
   skipCaptchaRequestsOptimization: boolean
   errorDisplayMode: 'code' | 'message'
   forwardCaptchaResponse: boolean
+  enterprise: {
+    scoreThreshold: number
+  }
   envVarNames: { secret: string }
 }>
 
@@ -52,6 +55,9 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     skipCaptchaRequestsOptimization: false,
     errorDisplayMode: 'message',
     forwardCaptchaResponse: false,
+    enterprise: {
+      scoreThreshold: 0.6,
+    },
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
@@ -63,6 +69,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     skipCaptchaRequestsOptimization,
     errorDisplayMode,
     forwardCaptchaResponse,
+    enterprise: { scoreThreshold },
     envVarNames,
   } = options
 
@@ -120,8 +127,17 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
 
     const hcaptchaVerifyResponseJson = await hcaptchaVerifyResponse.json()
 
-    const { success, 'error-codes': error }: HCaptchaVerifyResponse =
-      hcaptchaVerifyResponseJson
+    const {
+      success,
+      'error-codes': error,
+      score,
+    }: HCaptchaVerifyResponse = hcaptchaVerifyResponseJson
+
+    if (!score && scoreThreshold) {
+      throw new Error(
+        'Score threshold was set but no score was returned from HCaptcha response. This is possibly caused by not having enterprise key. Either unset enterprise.scoreThreshold or inspect your HCaptcha keys.',
+      )
+    }
 
     if (!success) {
       response.json({
@@ -135,6 +151,17 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       })
       response.end()
       return
+    }
+
+    if (score && scoreThreshold) {
+      if (score > scoreThreshold) {
+        response.json({
+          success: false,
+          message: `Score does not met specified (${scoreThreshold}) threshold.`,
+        })
+        response.end()
+        return
+      }
     }
 
     if (forwardCaptchaResponse) {
