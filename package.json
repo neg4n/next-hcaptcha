@@ -1,6 +1,6 @@
 {
   "name": "next-hcaptcha",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Guard your Next.js API routes with HCaptcha",
   "author": {
     "name": "Igor Klepacki",
