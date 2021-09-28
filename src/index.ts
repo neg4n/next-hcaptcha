@@ -12,6 +12,7 @@ export type NextHCaptchaOptions = Partial<{
   passRequestIpAddress: boolean
   skipCaptchaRequestsOptimization: boolean
   exceptions: boolean
+  cleanInterception: boolean
   errorDisplayMode: 'code' | 'message'
   forwardCaptchaResponse: boolean
   enterprise: {
@@ -63,6 +64,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     passRequestIpAddress: false,
     skipCaptchaRequestsOptimization: false,
     exceptions: false,
+    cleanInterception: true,
     errorDisplayMode: 'message',
     forwardCaptchaResponse: false,
     enterprise: {
@@ -78,6 +80,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     passRequestIpAddress,
     skipCaptchaRequestsOptimization,
     exceptions,
+    cleanInterception,
     errorDisplayMode,
     forwardCaptchaResponse,
     enterprise: { scoreThreshold },
@@ -110,6 +113,11 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       })
       response.end()
       return
+    }
+
+    if (cleanInterception) {
+      delete request.body['g-recaptcha-response']
+      delete request.body['h-captcha-response']
     }
 
     const requestIpAddress = (request.headers['cf-connecting-ip'] ||

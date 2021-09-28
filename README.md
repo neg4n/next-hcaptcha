@@ -51,6 +51,10 @@ const defaultOptions = {
   // Whether to throw when HCaptcha response is considered invalid.
   // (success property is false or score is not met when threshold is set)
   exceptions: false,
+  // Whether to clean h-captcha-response and g-recaptcha-response from body
+  // from intercepted Next.js request object. Useful when next-hcaptcha is
+  // part of middleware chain and you dont want these props e.g. in validation layer
+  cleanInterception: true,
   // Error display mode. If set to 'message', it will show error's descriptions
   // from https://docs.hcaptcha.com/#siteverify-error-codes-table. If set to 'code' it will
   // show the error code instead.
