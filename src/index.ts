@@ -1,5 +1,12 @@
 import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next'
 
+export class NextHCaptchaError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'NextHCaptchaError'
+  }
+}
+
 export type NextHCaptchaOptions = Partial<{
   captchaVerifyUrl: string
   passRequestIpAddress: boolean
@@ -82,7 +89,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       !skipCaptchaRequestsOptimization &&
       (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '')
     ) {
-      throw new Error(
+      throw new NextHCaptchaError(
         `${HCAPTCHA_ERRORS['missing-input-secret']} This must be done by providing ${envVarNames.secret} environment variable.`,
       )
     }
@@ -94,7 +101,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
 
     if (!skipCaptchaRequestsOptimization && !recaptchaResponse && !hcaptchaResponse) {
       if (exceptions) {
-        throw new Error(HCAPTCHA_ERRORS['missing-input-response'])
+        throw new NextHCaptchaError(HCAPTCHA_ERRORS['missing-input-response'])
       }
 
       response.json({
@@ -116,7 +123,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     }
 
     if (passRequestIpAddress && !requestIpAddress) {
-      throw new Error(
+      throw new NextHCaptchaError(
         'Could not resolve request ip address. Check if your reverse proxy is configured properly or consider setting `passRequestIpAddress` to `false`. Find more at https://github.com/neg4n/next-hcaptcha#configuration',
       )
     }
@@ -130,7 +137,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     })
 
     if (!hcaptchaVerifyResponse.ok) {
-      throw new Error('Unknown error has occurred.')
+      throw new NextHCaptchaError('Unknown error has occurred.')
     }
 
     const hcaptchaVerifyResponseJson = await hcaptchaVerifyResponse.json()
@@ -142,7 +149,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     }: HCaptchaVerifyResponse = hcaptchaVerifyResponseJson
 
     if (!score && scoreThreshold) {
-      throw new Error(
+      throw new NextHCaptchaError(
         'Score threshold was set but no score was returned from HCaptcha response. This is possibly caused by not having enterprise key. Either unset enterprise.scoreThreshold or inspect your HCaptcha keys.',
       )
     }
@@ -158,7 +165,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       }
 
       if (exceptions) {
-        throw new Error(errorObject.message || errorObject['error-codes'])
+        throw new NextHCaptchaError(errorObject.message || errorObject['error-codes'])
       }
 
       response.json({
@@ -172,7 +179,9 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     if (score && scoreThreshold) {
       if (score > scoreThreshold) {
         if (exceptions) {
-          throw new Error(`Score does not met specified (${scoreThreshold}) threshold.`)
+          throw new NextHCaptchaError(
+            `Score does not met specified (${scoreThreshold}) threshold.`,
+          )
         }
         response.json({
           success: false,
