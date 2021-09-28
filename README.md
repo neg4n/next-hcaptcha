@@ -48,6 +48,9 @@ const defaultOptions = {
   // Requests optimization are simple static checks if some
   // properties from the payload exist and if they are not empty.
   skipCaptchaRequestsOptimization: false,
+  // Whether to throw when HCaptcha response is considered invalid.
+  // (success property is false or score is not met when threshold is set)
+  exceptions: false,
   // Error display mode. If set to 'message', it will show error's descriptions
   // from https://docs.hcaptcha.com/#siteverify-error-codes-table. If set to 'code' it will
   // show the error code instead.
@@ -62,7 +65,7 @@ const defaultOptions = {
     // If scoreThreshold is specified, and no score is returned from HCaptcha
     // response - it will result in an exception.
     scoreThreshold: null,
-  }
+  },
   // Env vars names object. Key is type of env var and value is your custom name.
   // Value can be any string as long as it matches your .env* file.
   envVarNames: { secret: 'HCAPTCHA_SECRET' },

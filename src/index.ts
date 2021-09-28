@@ -4,6 +4,7 @@ export type NextHCaptchaOptions = Partial<{
   captchaVerifyUrl: string
   passRequestIpAddress: boolean
   skipCaptchaRequestsOptimization: boolean
+  exceptions: boolean
   errorDisplayMode: 'code' | 'message'
   forwardCaptchaResponse: boolean
   enterprise: {
@@ -54,6 +55,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
     passRequestIpAddress: false,
     skipCaptchaRequestsOptimization: false,
+    exceptions: false,
     errorDisplayMode: 'message',
     forwardCaptchaResponse: false,
     enterprise: {
@@ -68,6 +70,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     captchaVerifyUrl,
     passRequestIpAddress,
     skipCaptchaRequestsOptimization,
+    exceptions,
     errorDisplayMode,
     forwardCaptchaResponse,
     enterprise: { scoreThreshold },
@@ -141,14 +144,22 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     }
 
     if (!success) {
-      response.json({
-        success,
+      const errorObject = {
         ...(errorDisplayMode === 'code' && { 'error-codes': error }),
         ...(errorDisplayMode === 'message' && {
           message: Array.isArray(error)
             ? error.map((error) => HCAPTCHA_ERRORS[error])
             : HCAPTCHA_ERRORS[error],
         }),
+      }
+
+      if (exceptions) {
+        throw new Error(errorObject.message || errorObject['error-codes'])
+      }
+
+      response.json({
+        success,
+        ...errorObject,
       })
       response.end()
       return
@@ -156,6 +167,9 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
 
     if (score && scoreThreshold) {
       if (score > scoreThreshold) {
+        if (exceptions) {
+          throw new Error(`Score does not met specified (${scoreThreshold}) threshold.`)
+        }
         response.json({
           success: false,
           message: `Score does not met specified (${scoreThreshold}) threshold.`,
