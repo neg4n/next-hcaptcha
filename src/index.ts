@@ -93,6 +93,10 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     } = request.body
 
     if (!skipCaptchaRequestsOptimization && !recaptchaResponse && !hcaptchaResponse) {
+      if (exceptions) {
+        throw new Error(HCAPTCHA_ERRORS['missing-input-response'])
+      }
+
       response.json({
         success: false,
         message: HCAPTCHA_ERRORS['missing-input-response'],
