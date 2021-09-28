@@ -30,9 +30,10 @@ type HCaptchaVerifyResponse = {
   score_reason?: string[]
 }
 
-export type NextApiRequestWithHCaptcha = NextApiRequest & {
-  hcaptcha: HCaptchaVerifyResponse
-}
+export type NextApiRequestWithHCaptcha = NextApiRequest &
+  Partial<{
+    hcaptcha: HCaptchaVerifyResponse
+  }>
 
 const HCAPTCHA_ERRORS = {
   'missing-input-secret': 'Your secret key is missing.',
