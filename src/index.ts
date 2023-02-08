@@ -7,7 +7,7 @@ export class NextHCaptchaError extends Error {
   }
 }
 
-export type NextHCaptchaOptions = Partial<{
+type NextHCaptchaOpt = {
   captchaVerifyUrl: string
   passRequestIpAddress: boolean
   skipCaptchaRequestsOptimization: boolean
@@ -16,10 +16,12 @@ export type NextHCaptchaOptions = Partial<{
   errorDisplayMode: 'code' | 'message'
   forwardCaptchaResponse: boolean
   enterprise: {
-    scoreThreshold: number
+    scoreThreshold: number | null
   }
   envVarNames: { secret: string }
-}>
+}
+
+export type NextHCaptchaOptions = Partial<NextHCaptchaOpt>
 
 type HCaptchaPayload = {
   secret: string
@@ -59,7 +61,7 @@ const HCAPTCHA_ERRORS = {
 }
 
 export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptions = {}) {
-  const defaultOptions: NextHCaptchaOptions = {
+  const defaultOptions: NextHCaptchaOpt = {
     captchaVerifyUrl: 'https://hcaptcha.com/siteverify',
     passRequestIpAddress: false,
     skipCaptchaRequestsOptimization: false,
@@ -73,7 +75,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     envVarNames: { secret: 'HCAPTCHA_SECRET' },
   }
 
-  options = { ...defaultOptions, ...options }
+  const mergedOptions: NextHCaptchaOpt = { ...defaultOptions, ...options }
 
   const {
     captchaVerifyUrl,
@@ -85,13 +87,12 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
     forwardCaptchaResponse,
     enterprise: { scoreThreshold },
     envVarNames,
-  } = options
+  } = mergedOptions
 
   return async (request: NextApiRequestWithHCaptcha, response: NextApiResponse) => {
-    if (
-      !skipCaptchaRequestsOptimization &&
-      (!process.env[envVarNames.secret] || process.env[envVarNames.secret] === '')
-    ) {
+    const secret = process.env[envVarNames.secret] as string
+
+    if (!skipCaptchaRequestsOptimization && (!secret || secret === '')) {
       throw new NextHCaptchaError(
         `${HCAPTCHA_ERRORS['missing-input-secret']} This must be done by providing ${envVarNames.secret} environment variable.`,
       )
@@ -125,7 +126,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
       request.socket.remoteAddress) as string
 
     const payload: HCaptchaPayload = {
-      secret: process.env.HCAPTCHA_SECRET,
+      secret,
       response: recaptchaResponse || hcaptchaResponse,
       ...(passRequestIpAddress ? { remoteip: requestIpAddress } : null),
     }
@@ -168,7 +169,7 @@ export function withHCaptcha(handler: NextApiHandler, options: NextHCaptchaOptio
         ...(errorDisplayMode === 'message' && {
           message: Array.isArray(error)
             ? error.map((error) => HCAPTCHA_ERRORS[error])
-            : HCAPTCHA_ERRORS[error],
+            : HCAPTCHA_ERRORS[error!],
         }),
       }
 
